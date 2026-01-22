@@ -39,6 +39,7 @@ No implementation code has been added yet by design.
 ---
 
 ## Repository Structure
+```
 SafeSight-AI/
 ├── docs/
 │   ├── 01_problem_statement.md        # Industrial problem definition
@@ -71,7 +72,7 @@ SafeSight-AI/
 │
 ├── README.md                           # Project overview and status
 └── LICENSE                             # Project license
-
+```
 ---
 
 ## Documentation
