@@ -40,16 +40,37 @@ No implementation code has been added yet by design.
 
 ## Repository Structure
 SafeSight-AI/
-├── docs/ # Complete system documentation (finalized)
-├── diagrams/ # Architecture and pipeline diagrams
-├── reports/ # TN-IMPACT report template and final report
-├── presentations/ # TN-IMPACT presentation template and slides
-├── datasets/ # Dataset documentation (future use)
-├── experiments/ # Experimental tracking (future use)
-├── logs/ # Logging structure (future use)
-├── README.md
-└── LICENSE
-
+├── docs/
+│   ├── 01_problem_statement.md        # Industrial problem definition
+│   ├── 02_system_architecture.md      # End-to-end system architecture
+│   ├── 03_data_strategy.md            # Dataset sources and preparation strategy
+│   ├── 04_model_strategy.md           # Object detection and model design rationale
+│   ├── 05_real_time_pipeline.md       # Real-time processing workflow
+│   ├── 06_violation_logic.md           # Rule-based safety violation logic
+│   ├── 07_evaluation_metrics.md       # Performance and validation metrics
+│   └── 08_future_scope.md              # Planned enhancements and extensions
+│
+├── diagrams/
+│   ├── system_architecture.png        # System-level architecture diagram
+│   └── real_time_pipeline.png         # Real-time processing pipeline diagram
+│
+├── reports/
+│   └── TN-IMPACT_2026_REPORT_FORMAT.docx   # Official TN-IMPACT report template
+│
+├── presentations/
+│   └── TN-IMPACT_2026_PPT_TEMPLATE.pptx    # Official TN-IMPACT presentation template
+│
+├── datasets/
+│   └── README.md                       # Dataset documentation (future use)
+│
+├── experiments/
+│   └── README.md                       # Experiment tracking (future use)
+│
+├── logs/
+│   └── README.md                       # Violation and system logs (future use)
+│
+├── README.md                           # Project overview and status
+└── LICENSE                             # Project license
 
 ---
 
