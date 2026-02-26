@@ -1,0 +1,20 @@
+# SafeSight AI - Python Dependencies
+
+# Deep Learning & Computer Vision
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+scipy>=1.10.0
+
+# API & Web
+flask>=2.3.0
+flask-cors>=4.0.0
+
+# Utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Optional: Database utilities
+# For advanced database features if needed later
