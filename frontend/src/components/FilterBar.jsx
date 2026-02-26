@@ -13,10 +13,10 @@ export default function FilterBar({
   showSeverity = true,
 }) {
   const selectClass =
-    'bg-[var(--color-surface-alt)] border border-[var(--color-border)] text-[var(--color-text)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]';
+    'w-full sm:w-auto bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] cursor-pointer';
 
   return (
-    <div className="flex flex-wrap gap-3 items-center">
+    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 items-center">
       {/* Camera */}
       <select
         className={selectClass}
@@ -48,13 +48,13 @@ export default function FilterBar({
       {/* Severity */}
       {showSeverity && (
         <select
-          className={selectClass}
+          className={`${selectClass} col-span-2 sm:col-span-1`}
           value={selectedSeverity}
           onChange={(e) => onSeverityChange(e.target.value)}
         >
           <option value="">All Severities</option>
-          <option value="critical">Critical</option>
-          <option value="warning">Warning</option>
+          <option value="critical">🔴 Critical</option>
+          <option value="warning">🟡 Warning</option>
         </select>
       )}
     </div>

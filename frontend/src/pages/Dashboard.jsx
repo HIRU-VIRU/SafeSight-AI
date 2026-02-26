@@ -63,8 +63,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Dashboard</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
         <button
           onClick={load}
           disabled={loading}
@@ -104,16 +104,17 @@ export default function Dashboard() {
       </div>
 
       {/* Hourly chart */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5">
-        <h2 className="text-lg font-semibold mb-4">Hourly Violations (Today)</h2>
-        <div className="h-64">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-5">
+        <h2 className="text-base sm:text-lg font-semibold mb-4">Hourly Violations — Today</h2>
+        <div className="h-52 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={hourly}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis
                 dataKey="hour"
-                tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }}
-                interval={1}
+                tick={{ fill: 'var(--color-text-muted)', fontSize: 10 }}
+                interval={3}
+                tickFormatter={(v) => v.replace(':00', 'h')}
               />
               <YAxis tick={{ fill: 'var(--color-text-muted)', fontSize: 11 }} allowDecimals={false} />
               <Tooltip
@@ -131,8 +132,8 @@ export default function Dashboard() {
       </div>
 
       {/* Recent violations */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5">
-        <h2 className="text-lg font-semibold mb-4">Recent Violations</h2>
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-5">
+        <h2 className="text-base sm:text-lg font-semibold mb-4">Recent Violations</h2>
         <ViolationTable violations={recent} showImage={false} />
       </div>
     </div>

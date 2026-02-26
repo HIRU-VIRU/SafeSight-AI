@@ -57,11 +57,11 @@ export default function Alerts() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Alerts</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold">Alerts</h1>
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface-alt)] border border-[var(--color-border)] rounded-lg text-sm font-medium hover:bg-[var(--color-border)] transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg text-sm font-medium hover:bg-[var(--color-surface-alt)] transition-colors shadow-sm"
         >
           <Download size={16} />
           Export CSV
@@ -81,7 +81,7 @@ export default function Alerts() {
       />
 
       {/* Results */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-5">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-5">
         {loading ? (
           <div className="text-center py-12 text-[var(--color-text-muted)]">Loading…</div>
         ) : (

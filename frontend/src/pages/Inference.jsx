@@ -77,8 +77,8 @@ export default function Inference() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Inference Control</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold">Inference Control</h1>
         <span className="flex items-center gap-2 text-sm">
           {apiOnline === true ? (
             <>
@@ -99,9 +99,9 @@ export default function Inference() {
       {/* Start form */}
       <form
         onSubmit={handleStart}
-        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-4"
+        className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-6 space-y-4"
       >
-        <h2 className="text-lg font-semibold">Start New Inference</h2>
+        <h2 className="text-base sm:text-lg font-semibold">Start New Inference</h2>
 
         <div>
           <label className="block text-sm text-[var(--color-text-muted)] mb-1">
@@ -149,9 +149,9 @@ export default function Inference() {
       </form>
 
       {/* Running streams */}
-      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-4">
+      <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Running Streams</h2>
+          <h2 className="text-base sm:text-lg font-semibold">Running Streams</h2>
           <button
             onClick={refresh}
             className="p-2 rounded-lg hover:bg-[var(--color-surface-alt)] transition-colors"
@@ -238,8 +238,8 @@ export default function Inference() {
 
       {/* Live Feed Grid — show all live streams at once */}
       {aliveStreams.length > 0 && (
-        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-6 space-y-4">
-          <h2 className="text-lg font-semibold">Live Feed</h2>
+        <div className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-xl p-4 sm:p-6 space-y-4">
+          <h2 className="text-base sm:text-lg font-semibold">Live Feed</h2>
           <div
             className={`grid gap-4 ${
               aliveStreams.length === 1

@@ -31,8 +31,8 @@ export default function ViolationTable({ violations = [], showImage = false }) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto -mx-1 px-1">
+      <table className="w-full text-sm" style={{ minWidth: '560px' }}>
         <thead>
           <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-text-muted)]">
             <th className="py-3 px-4">Severity</th>
