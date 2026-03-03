@@ -8,6 +8,17 @@ import {
   inferenceStreamUrl,
 } from '../api';
 
+// Construction site videos committed to the repo — available on Render
+const PRESET_SOURCES = [
+  { label: 'Footage BW',          path: 'construction_site_videos/footage-bw.mp4' },
+  { label: 'A-Team BW',           path: 'construction_site_videos/a-team-bw.mp4' },
+  { label: 'Brick Laying',        path: 'construction_site_videos/energetic-construction-site-with-efficient-brick-laying-in-progress-SBV-352573165-preview.mp4' },
+  { label: 'Pouring Concrete',    path: 'construction_site_videos/pouring-concrete-shots-of-civil-works-construction-equipment-and-workers-concr-SBV-347401923-preview.mp4' },
+  { label: 'Workers Walking',     path: 'construction_site_videos/construction-workers-walked-toward-camera-slow-mo-SBV-300151624-preview.mp4' },
+  { label: 'Welding Foundations', path: 'construction_site_videos/welding-building-foundations-on-construction-site-copy-SBV-347428694-preview.mp4' },
+  { label: 'Team End of Shift',   path: 'construction_site_videos/three-civil-engineers-at-the-end-of-their-work-shift-on-construction-site-SBV-321788883-preview.mp4' },
+];
+
 export default function Inference() {
   const [source, setSource] = useState('');
   const [streamId, setStreamId] = useState('');
@@ -103,16 +114,40 @@ export default function Inference() {
       >
         <h2 className="text-base sm:text-lg font-semibold">Start New Inference</h2>
 
+        {/* Preset quick-pick */}
+        <div>
+          <p className="text-sm text-[var(--color-text-muted)] mb-2">Quick-pick a construction video:</p>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_SOURCES.map((p) => (
+              <button
+                key={p.path}
+                type="button"
+                onClick={() => setSource(p.path)}
+                className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+                  source === p.path
+                    ? 'border-[var(--color-accent)] bg-[var(--color-accent)]/20 text-[var(--color-accent)]'
+                    : 'border-[var(--color-border)] text-[var(--color-text-muted)] hover:border-[var(--color-accent)]'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div>
           <label className="block text-sm text-[var(--color-text-muted)] mb-1">
             Video Source <span className="text-[var(--color-critical)]">*</span>
           </label>
           <input
             className={inputClass}
-            placeholder="rtsp://camera_ip:port/stream  or  /path/to/video.mp4  or  http://..."
+            placeholder="Pick a preset above, or enter rtsp://camera_ip/stream"
             value={source}
             onChange={(e) => setSource(e.target.value)}
           />
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+            ⚠ Local IPs (e.g. <code>tcp://192.168.x.x</code> or <code>172.x.x.x</code>) are unreachable from the cloud. Use the presets or a public RTSP/HTTP URL.
+          </p>
         </div>
 
         <div>
