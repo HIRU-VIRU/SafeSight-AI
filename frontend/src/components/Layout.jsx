@@ -8,10 +8,12 @@ import {
   ShieldAlert,
   Menu,
   X,
+  Film,
 } from 'lucide-react';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/demo', icon: Film, label: 'Demo' },
   { to: '/alerts', icon: AlertTriangle, label: 'Alerts' },
   { to: '/incidents', icon: Image, label: 'Incidents' },
   { to: '/inference', icon: Play, label: 'Inference' },
@@ -43,11 +45,20 @@ export default function Layout() {
       >
         {/* Logo */}
         <div className="flex items-center justify-between px-5 py-5 border-b border-[var(--color-border)]">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md"
+              style={{ background: 'var(--grad-primary)' }}
+            >
               <ShieldAlert className="text-white" size={18} />
             </div>
-            <span className="text-base font-bold tracking-tight text-[var(--color-text)]">SafeSight AI</span>
+            <div>
+              <span className="text-base font-extrabold tracking-tight text-[var(--color-text)]">SafeSight</span>
+              <span
+                className="text-base font-extrabold tracking-tight ml-1"
+                style={{ background: 'var(--grad-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
+              >AI</span>
+            </div>
           </div>
           <button
             className="md:hidden p-1 rounded-md text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] transition-colors"
@@ -66,10 +77,10 @@ export default function Layout() {
               end={to === '/'}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                `relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[var(--color-accent)] text-white shadow-sm'
-                    : 'text-[var(--color-text-muted)] hover:bg-[var(--color-surface-alt)] hover:text-[var(--color-text)]'
+                    ? 'nav-active'
+                    : 'nav-idle text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
                 }`
               }
             >
@@ -80,10 +91,16 @@ export default function Layout() {
         </nav>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-[var(--color-border)]">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
-            <span className="text-xs text-[var(--color-text-muted)]">SafeSight AI v1.0</span>
+        <div className="px-4 py-4 border-t border-[var(--color-border)]">
+          <div
+            className="flex items-center gap-2 rounded-lg px-3 py-2"
+            style={{ background: 'linear-gradient(135deg,rgba(79,70,229,.06) 0%,rgba(124,58,237,.06) 100%)' }}
+          >
+            <div className="relative">
+              <div className="w-2 h-2 rounded-full bg-[var(--color-success)]"></div>
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-[var(--color-success)] animate-ping opacity-60"></div>
+            </div>
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">SafeSight AI v1.0 · Live</span>
           </div>
         </div>
       </aside>

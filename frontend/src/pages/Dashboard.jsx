@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   AlertOctagon,
   AlertTriangle,
   ShieldCheck,
   BarChart3,
   RefreshCw,
+  Film,
+  Radio,
 } from 'lucide-react';
 import {
   BarChart,
@@ -25,6 +28,7 @@ import {
 } from '../api';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [counts, setCounts] = useState(null);
   const [hourly, setHourly] = useState([]);
   const [recent, setRecent] = useState([]);
@@ -64,14 +68,60 @@ export default function Dashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold">Dashboard</h1>
+          <p className="text-sm text-[var(--color-text-muted)] mt-0.5">Real-time PPE compliance overview</p>
+        </div>
         <button
           onClick={load}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text-muted)] rounded-xl text-sm font-medium hover:bg-[var(--color-surface-alt)] transition-all disabled:opacity-50"
         >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
           Refresh
+        </button>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Live Inference */}
+        <button
+          onClick={() => navigate('/inference')}
+          className="btn-live group relative overflow-hidden rounded-2xl px-6 py-5 text-white text-left shadow-lg"
+        >
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 60%)' }} />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+              <Radio size={22} className="text-white" />
+            </div>
+            <div>
+              <p className="text-base font-bold tracking-tight">Live Inference</p>
+              <p className="text-xs text-white/75 mt-0.5">Start real-time PPE detection on a video stream</p>
+            </div>
+          </div>
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-30 group-hover:opacity-60 transition-opacity">
+            <Radio size={48} />
+          </div>
+        </button>
+
+        {/* Demo */}
+        <button
+          onClick={() => navigate('/demo')}
+          className="btn-demo group relative overflow-hidden rounded-2xl px-6 py-5 text-white text-left shadow-lg"
+        >
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: 'linear-gradient(135deg,rgba(255,255,255,.08) 0%,transparent 60%)' }} />
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
+              <Film size={22} className="text-white" />
+            </div>
+            <div>
+              <p className="text-base font-bold tracking-tight">Demo Videos</p>
+              <p className="text-xs text-white/75 mt-0.5">Watch 4 pre-processed AI safety detection clips</p>
+            </div>
+          </div>
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 opacity-30 group-hover:opacity-60 transition-opacity">
+            <Film size={48} />
+          </div>
         </button>
       </div>
 

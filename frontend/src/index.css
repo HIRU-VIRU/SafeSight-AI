@@ -12,6 +12,14 @@
   --color-success: #0a8f6a;
   --color-accent: #4f46e5;
   --color-accent-soft: #eef2ff;
+
+  /* gradient palette */
+  --grad-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --grad-demo:    linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  --grad-live:    linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
+  --grad-warn:    linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  --grad-sidebar: linear-gradient(180deg, #1e1b4b 0%, #1e293b 100%);
+  --grad-card:    linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
 }
 
 body {
@@ -23,6 +31,59 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── gradient nav link (active state) ── */
+.nav-active {
+  background: var(--grad-primary);
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(79,70,229,.35);
+}
+
+/* ── gradient hover glow on sidebar links ── */
+.nav-idle {
+  position: relative;
+  overflow: hidden;
+}
+.nav-idle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--grad-primary);
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 0.5rem;
+}
+.nav-idle:hover::before { opacity: 0.08; }
+
+/* ── gradient action buttons ── */
+.btn-live {
+  background: var(--grad-live);
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-live:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16,185,129,.35);
+}
+
+.btn-demo {
+  background: var(--grad-demo);
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.btn-demo:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(99,102,241,.4);
+}
+
+/* ── gradient card glow on hover ── */
+.card-hover {
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(79,70,229,.1);
 }
 
 ::-webkit-scrollbar { width: 5px; }

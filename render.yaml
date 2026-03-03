@@ -1,0 +1,105 @@
+##############################################################################
+# SafeSight AI – Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# Deploys a single Web Service that:
+#   - Builds the React frontend (Vite)
+#   - Serves the built app + API from one Gunicorn process
+#
+# Prerequisites
+# ─────────────
+#  1. Push this repo to GitHub / GitLab.
+#  2. On Render → New → Blueprint, point to your repo.
+#  3. Set the required secret env vars in the Render dashboard
+#     (MODEL_DOWNLOAD_URL if you host best.pt externally, FLASK_SECRET_KEY, etc.)
+#  4. Attach the persistent disk so SQLite + demo videos survive redeploys.
+#
+# Persistent Disk
+# ───────────────
+#  Mount path : /data          (see `disk` section below)
+#  DATABASE_PATH  → /data/safesight.db
+#  STORAGE_PATH   → /data/storage/violations
+#  DEMO_STORAGE_PATH → /data/storage/demo
+#  LOG_PATH       → /data/logs
+#
+# Note on inference
+# ─────────────────
+#  Render Web Services do NOT have GPUs.  Inference (YOLO) runs on CPU.
+#  The live-inference feature will work but at lower FPS than locally.
+#  The Demo page shows pre-generated videos stored on the persistent disk.
+##############################################################################
+
+services:
+  - type: web
+    name: safesight-ai
+    runtime: python
+    region: oregon          # pick your nearest: oregon | frankfurt | singapore | ohio
+
+    # ── Build ────────────────────────────────────────────────────────────────
+    buildCommand: ./build.sh
+
+    # ── Start ────────────────────────────────────────────────────────────────
+    # Gunicorn: 1 worker with 4 threads is fine for Render's starter tier.
+    # Increase workers on higher plans.
+    startCommand: >-
+      gunicorn "api.dashboard_api:create_app()"
+      --bind "0.0.0.0:$PORT"
+      --workers 1
+      --worker-class gthread
+      --threads 4
+      --timeout 300
+      --keep-alive 5
+      --access-logfile -
+      --error-logfile -
+
+    # ── Persistent Disk (Render Starter plan, ~$7/mo) ─────────────────────
+    # Comment out if you're on the free tier (data resets on redeploy).
+    disk:
+      name: safesight-data
+      mountPath: /data
+      sizeGB: 10
+
+    # ── Environment Variables ─────────────────────────────────────────────
+    envVars:
+      # Runtime paths – point everything at the persistent disk
+      - key: DATABASE_PATH
+        value: /data/safesight.db
+
+      - key: STORAGE_PATH
+        value: /data/storage/violations
+
+      - key: DEMO_STORAGE_PATH
+        value: /data/storage/demo
+
+      - key: LOG_PATH
+        value: /data/logs
+
+      # Model: keep best.pt in git OR set MODEL_DOWNLOAD_URL and build.sh
+      # will fetch it automatically on each deploy.
+      - key: MODEL_PATH
+        value: model/best.pt        # relative to project root (default)
+
+      # YOLO / detection
+      - key: CONF_THRESHOLD
+        value: "0.30"
+      - key: IOU_THRESHOLD
+        value: "0.30"
+      - key: DEVICE
+        value: "cpu"                # no GPU on Render
+      - key: IMG_SIZE
+        value: "416"                # smaller = faster on CPU
+
+      # Flask
+      - key: API_DEBUG
+        value: "false"
+      - key: FLASK_SECRET_KEY
+        generateValue: true         # Render generates a random value
+
+      # Optional – fill in the Render dashboard, not here
+      # - key: ALERT_WEBHOOK_URL
+      #   sync: false               # user provides at deploy time
+      # - key: MODEL_DOWNLOAD_URL
+      #   sync: false               # URL to download best.pt if not in git
+
+    # ── Health check ─────────────────────────────────────────────────────
+    healthCheckPath: /health

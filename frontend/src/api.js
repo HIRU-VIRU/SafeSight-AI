@@ -116,6 +116,24 @@ export function inferenceStreamUrl(streamId) {
   return `${BASE}/inference/stream/${encodeURIComponent(streamId)}`;
 }
 
+// ─── Demo videos ─────────────────────────────────────────
+
+export async function getDemoList() {
+  return fetchJSON('/demo/list');
+}
+
+export async function getDemoOriginals() {
+  return fetchJSON('/demo/originals');
+}
+
+export function demoVideoUrl(filename) {
+  return `${BASE}/demo/video/${encodeURIComponent(filename)}`;
+}
+
+export function originalVideoUrl(filename) {
+  return `${BASE}/demo/original/${encodeURIComponent(filename)}`;
+}
+
 // ─── Health ──────────────────────────────────────────────
 
 export async function healthCheck() {

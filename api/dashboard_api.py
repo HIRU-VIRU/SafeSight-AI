@@ -13,7 +13,7 @@ import time
 import cv2
 
 from services.database import DatabaseService
-from config.settings import API_HOST, API_PORT, API_DEBUG, CAMERA_ID, STORAGE_PATH, BASE_DIR
+from config.settings import API_HOST, API_PORT, API_DEBUG, CAMERA_ID, STORAGE_PATH, BASE_DIR, DEMO_STORAGE_PATH
 
 
 # Global registry of running inference threads so the API can report / control them
@@ -23,7 +23,12 @@ _streams_lock = threading.Lock()
 
 def create_app():
     """Create and configure Flask application."""
-    app = Flask(__name__)
+    FRONTEND_DIST = Path(BASE_DIR) / 'frontend' / 'dist'
+
+    # static_folder=None: we serve all static assets manually in the SPA
+    # fallback so Flask's built-in static routing never conflicts with our
+    # API routes or React Router paths.
+    app = Flask(__name__, static_folder=None)
     CORS(app)  # Enable CORS for frontend access
     
     # Initialize database service
@@ -31,7 +36,10 @@ def create_app():
     
     @app.route('/')
     def index():
-        """API root endpoint."""
+        """Serve built frontend or API root."""
+        index_file = FRONTEND_DIST / 'index.html'
+        if index_file.exists():
+            return send_file(str(index_file))
         return jsonify({
             "service": "SafeSight AI Dashboard API",
             "version": "1.0.0",
@@ -418,6 +426,161 @@ def create_app():
         except Exception as e:
             return jsonify({"success": False, "error": str(e)}), 500
 
+    # ------------------------------------------------------------------ demo videos
+
+    DEMO_DIR = Path(DEMO_STORAGE_PATH)
+
+    @app.route('/demo/list', methods=['GET'])
+    def demo_list():
+        """
+        List available pre-processed demo videos.
+
+        Returns JSON array of objects:
+            { "id": "demo_1_...", "filename": "...", "url": "/demo/video/..." }
+        """
+        try:
+            if not DEMO_DIR.exists():
+                return jsonify({"success": True, "demos": []})
+
+            demos = []
+            for mp4 in sorted(DEMO_DIR.glob("*.mp4")):
+                demos.append({
+                    "id": mp4.stem,
+                    "filename": mp4.name,
+                    "url": f"/demo/video/{mp4.name}",
+                    "size_mb": round(mp4.stat().st_size / (1024 * 1024), 1),
+                })
+            return jsonify({"success": True, "demos": demos})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    @app.route('/demo/video/<filename>', methods=['GET'])
+    def serve_demo_video(filename: str):
+        """
+        Serve a demo video file with HTTP range support so browsers can seek.
+
+        Security: only files directly inside DEMO_DIR are allowed.
+        """
+        try:
+            full = (DEMO_DIR / filename).resolve()
+            # Guard against path traversal
+            if not str(full).startswith(str(DEMO_DIR.resolve())):
+                return jsonify({"error": "Forbidden"}), 403
+            if not full.exists():
+                return jsonify({"error": "Not found"}), 404
+
+            file_size = full.stat().st_size
+            range_header = request.headers.get('Range')
+
+            if range_header:
+                # Parse "bytes=start-end"
+                byte_range = range_header.replace('bytes=', '').strip()
+                parts = byte_range.split('-')
+                start = int(parts[0]) if parts[0] else 0
+                end = int(parts[1]) if parts[1] else file_size - 1
+                end = min(end, file_size - 1)
+                length = end - start + 1
+
+                def _generate():
+                    with open(str(full), 'rb') as fh:
+                        fh.seek(start)
+                        remaining = length
+                        while remaining:
+                            chunk = fh.read(min(65536, remaining))
+                            if not chunk:
+                                break
+                            remaining -= len(chunk)
+                            yield chunk
+
+                headers = {
+                    'Content-Range': f'bytes {start}-{end}/{file_size}',
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': str(length),
+                    'Content-Type': 'video/mp4',
+                }
+                return Response(_generate(), status=206, headers=headers)
+            else:
+                # Full file
+                return send_file(str(full), mimetype='video/mp4',
+                                 conditional=True)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/demo/original/<filename>', methods=['GET'])
+    def serve_original_video(filename: str):
+        """
+        Serve an original (un-processed) construction-site video.
+
+        Security: only .mp4 files inside construction_site_videos/ are served.
+        """
+        try:
+            orig_dir = (Path(BASE_DIR) / 'construction_site_videos').resolve()
+            full = (orig_dir / filename).resolve()
+            if not str(full).startswith(str(orig_dir)):
+                return jsonify({"error": "Forbidden"}), 403
+            if not full.exists():
+                return jsonify({"error": "Not found"}), 404
+
+            file_size = full.stat().st_size
+            range_header = request.headers.get('Range')
+
+            if range_header:
+                byte_range = range_header.replace('bytes=', '').strip()
+                parts = byte_range.split('-')
+                start = int(parts[0]) if parts[0] else 0
+                end = int(parts[1]) if parts[1] else file_size - 1
+                end = min(end, file_size - 1)
+                length = end - start + 1
+
+                def _generate_orig():
+                    with open(str(full), 'rb') as fh:
+                        fh.seek(start)
+                        remaining = length
+                        while remaining:
+                            chunk = fh.read(min(65536, remaining))
+                            if not chunk:
+                                break
+                            remaining -= len(chunk)
+                            yield chunk
+
+                headers = {
+                    'Content-Range': f'bytes {start}-{end}/{file_size}',
+                    'Accept-Ranges': 'bytes',
+                    'Content-Length': str(length),
+                    'Content-Type': 'video/mp4',
+                }
+                return Response(_generate_orig(), status=206, headers=headers)
+            else:
+                return send_file(str(full), mimetype='video/mp4', conditional=True)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    @app.route('/demo/originals', methods=['GET'])
+    def demo_originals():
+        """List original source videos that correspond to the 4 demo clips."""
+        try:
+            orig_dir = Path(BASE_DIR) / 'construction_site_videos'
+            SELECTED = [
+                "a-team-bw.mp4",
+                "construction-workers-walked-toward-camera-slow-mo-SBV-300151624-preview.mp4",
+                "energetic-construction-site-with-efficient-brick-laying-in-progress-SBV-352573165-preview.mp4",
+                "pouring-concrete-shots-of-civil-works-construction-equipment-and-workers-concr-SBV-347401923-preview.mp4",
+            ]
+            originals = []
+            for f in SELECTED:
+                p = orig_dir / f
+                if p.exists():
+                    originals.append({
+                        "filename": f,
+                        "url": f"/demo/original/{f}",
+                        "size_mb": round(p.stat().st_size / (1024 * 1024), 1),
+                    })
+            return jsonify({"success": True, "originals": originals})
+        except Exception as e:
+            return jsonify({"success": False, "error": str(e)}), 500
+
+    # ------------------------------------------------------------------ inference stream
+
     @app.route('/inference/stream/<stream_id>', methods=['GET'])
     def stream_video(stream_id: str):
         """
@@ -441,7 +604,32 @@ def create_app():
                 time.sleep(0.05)  # ~20 fps cap
 
         return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    
+
+    # ------------------------------------------------------------------ SPA fallback
+    # Must be the LAST route registered so API routes take priority.
+    # Handles two cases:
+    #   1. Static asset  (path has an extension) → serve from dist/
+    #   2. React Router path (no file extension) → serve dist/index.html
+
+    @app.route('/', defaults={'path': ''}, methods=['GET'])
+    @app.route('/<path:path>', methods=['GET'])
+    def spa_fallback(path: str):
+        index_file = FRONTEND_DIST / 'index.html'
+        if not index_file.exists():
+            # No built frontend — return API info
+            return jsonify({
+                'service': 'SafeSight AI API',
+                'note': 'Frontend not built. Run: cd frontend && npm run build',
+            })
+
+        # Try to serve an actual file (JS/CSS/images/fonts)
+        asset = FRONTEND_DIST / path
+        if path and asset.exists() and asset.is_file():
+            return send_from_directory(str(FRONTEND_DIST), path)
+
+        # Everything else → SPA entry point
+        return send_file(str(index_file))
+
     return app
 
 

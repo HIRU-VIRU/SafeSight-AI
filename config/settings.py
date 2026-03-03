@@ -12,10 +12,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 # Base paths
-MODEL_PATH = os.getenv("MODEL_PATH", str(BASE_DIR / "model" / "best.pt"))
-DATABASE_PATH = os.getenv("DATABASE_PATH", str(BASE_DIR / "safesight.db"))
-STORAGE_PATH = os.getenv("STORAGE_PATH", str(BASE_DIR / "storage" / "violations"))
-LOG_PATH = os.getenv("LOG_PATH", str(BASE_DIR / "logs"))
+MODEL_PATH      = os.getenv("MODEL_PATH",      str(BASE_DIR / "model" / "best.pt"))
+DATABASE_PATH   = os.getenv("DATABASE_PATH",   str(BASE_DIR / "safesight.db"))
+STORAGE_PATH    = os.getenv("STORAGE_PATH",    str(BASE_DIR / "storage" / "violations"))
+DEMO_STORAGE_PATH = os.getenv("DEMO_STORAGE_PATH", str(BASE_DIR / "storage" / "demo"))
+LOG_PATH        = os.getenv("LOG_PATH",        str(BASE_DIR / "logs"))
 
 # YOLO Detection Configuration
 CONF_THRESHOLD = float(os.getenv("CONF_THRESHOLD", "0.3"))
@@ -50,8 +51,9 @@ ENABLE_SOUND_ALERT = os.getenv("ENABLE_SOUND_ALERT", "false").lower() == "true"
 ALERT_WEBHOOK_URL = os.getenv("ALERT_WEBHOOK_URL", None)
 
 # API Configuration
-API_HOST = os.getenv("API_HOST", "0.0.0.0")
-API_PORT = int(os.getenv("API_PORT", "5000"))
+# Render injects $PORT at runtime; API_PORT is the local dev fallback.
+API_HOST  = os.getenv("API_HOST",  "0.0.0.0")
+API_PORT  = int(os.getenv("PORT") or os.getenv("API_PORT", "5000"))
 API_DEBUG = os.getenv("API_DEBUG", "false").lower() == "true"
 
 # Performance Configuration
@@ -79,8 +81,9 @@ def validate_config() -> bool:
         print(f"❌ Model file not found: {MODEL_PATH}")
         return False
     
-    # Create storage directory if doesn't exist
+    # Create storage directories if they don't exist
     Path(STORAGE_PATH).mkdir(parents=True, exist_ok=True)
+    Path(DEMO_STORAGE_PATH).mkdir(parents=True, exist_ok=True)
     Path(LOG_PATH).mkdir(parents=True, exist_ok=True)
     
     print("✅ Configuration validated successfully")

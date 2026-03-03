@@ -1,3 +1,13 @@
+q# Deployment artifacts
+frontend/dist/
+frontend/node_modules/
+
+# Demo videos (large, generated at runtime — committed separately if needed)
+# storage/demo/
+
+# Model (42 MB — keep in repo unless using Git LFS + MODEL_DOWNLOAD_URL)
+# model/best.pt
+
 # Python
 __pycache__/
 *.py[cod]
