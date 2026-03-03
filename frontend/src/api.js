@@ -1,11 +1,43 @@
 /**
- * API helper – all calls go through Vite's proxy (/api -> Flask :5000).
+ * API helper.
+ * - Local dev : Vite proxy rewrites /api → http://localhost:5000
+ * - Vercel    : set VITE_API_BASE_URL=https://your-render-url.onrender.com in
+ *               Vercel project settings (Environment Variables)
  */
 
-const BASE = '/api';
+export const BASE = import.meta.env.VITE_API_BASE_URL
+  ? import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '')  // strip trailing slash
+  : '/api';                              // local dev: Vite proxy
+
+/** True when running on Vercel/production without an API URL configured */
+export const API_MISCONFIGURED =
+  !import.meta.env.VITE_API_BASE_URL &&
+  import.meta.env.PROD;  // import.meta.env.PROD is true after `vite build`
 
 async function fetchJSON(path, options = {}) {
-  const res = await fetch(`${BASE}${path}`, options);
+  if (API_MISCONFIGURED) {
+    throw new Error(
+      'API not configured. Set VITE_API_BASE_URL in Vercel → Project Settings → Environment Variables.'
+    );
+  }
+
+  let res;
+  try {
+    res = await fetch(`${BASE}${path}`, options);
+  } catch (networkErr) {
+    throw new Error(`Network error – is the backend running? (${networkErr.message})`);
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    // Got HTML (e.g. Vercel 404 page or nginx error) – surface a clear message
+    const text = await res.text();
+    throw new Error(
+      `Expected JSON but got HTML (${res.status}). ` +
+      `Check VITE_API_BASE_URL points to your Render backend.\n\nResponse: ${text.slice(0, 120)}`
+    );
+  }
+
   const data = await res.json();
   if (!res.ok || data.success === false) {
     throw new Error(data.error || `Request failed (${res.status})`);

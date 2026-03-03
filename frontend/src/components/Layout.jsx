@@ -9,7 +9,9 @@ import {
   Menu,
   X,
   Film,
+  AlertOctagon,
 } from 'lucide-react';
+import { API_MISCONFIGURED } from '../api';
 
 const NAV = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -120,6 +122,23 @@ export default function Layout() {
           </div>
           <span className="font-bold text-sm text-[var(--color-text)]">SafeSight AI</span>
         </header>
+
+        {/* API misconfiguration banner */}
+        {API_MISCONFIGURED && (
+          <div className="flex items-start gap-3 bg-amber-50 border-b border-amber-200 px-4 py-3 text-amber-800 text-sm flex-shrink-0">
+            <AlertOctagon size={16} className="text-amber-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <span className="font-semibold">Backend not connected.</span>{' '}
+              Go to{' '}
+              <strong>Vercel → Project Settings → Environment Variables</strong>{' '}
+              and add{' '}
+              <code className="bg-amber-100 px-1 rounded font-mono text-xs">VITE_API_BASE_URL</code>
+              {' '}=&nbsp;
+              <code className="bg-amber-100 px-1 rounded font-mono text-xs">https://your-app.onrender.com</code>,
+              then redeploy.
+            </div>
+          </div>
+        )}
 
         {/* Main content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
