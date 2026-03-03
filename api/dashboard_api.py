@@ -366,8 +366,12 @@ def create_app():
                 if stream_id in _active_streams:
                     return jsonify({"success": False, "error": f"Stream '{stream_id}' already running"}), 409
 
-            # Lazy imports to avoid circular deps at module load time
-            from core.inference import InferencePipeline
+            # Lazy import – choose local or remote pipeline based on config
+            from config.settings import USE_REMOTE_INFERENCE
+            if USE_REMOTE_INFERENCE:
+                from core.remote_inference import RemoteInferencePipeline as InferencePipeline
+            else:
+                from core.inference import InferencePipeline
 
             pipeline = InferencePipeline(stream_id=stream_id)
 

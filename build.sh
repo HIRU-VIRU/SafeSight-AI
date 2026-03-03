@@ -23,7 +23,15 @@ echo "╚═══════════════════════�
 echo ""
 echo "▶ [1/4] Installing Python dependencies..."
 pip install --upgrade pip --quiet
-pip install -r requirements.txt --quiet
+
+# Remote inference mode = no torch/ultralytics needed → fits in 512 MB RAM
+if [ "${USE_REMOTE_INFERENCE:-false}" = "true" ]; then
+  echo "  ℹ️  USE_REMOTE_INFERENCE=true → using requirements-render.txt (no torch)"
+  pip install -r requirements-render.txt --quiet
+else
+  echo "  ℹ️  Local inference mode → using requirements.txt (includes torch)"
+  pip install -r requirements.txt --quiet
+fi
 echo "  ✅ Python deps installed"
 
 # ── 2. Frontend build ─────────────────────────────────────────────────────────

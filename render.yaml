@@ -2,31 +2,34 @@
 # SafeSight AI – Render Blueprint
 # https://render.com/docs/blueprint-spec
 #
-# Deploys a single Web Service that:
-#   - Builds the React frontend (Vite)
-#   - Serves the built app + API from one Gunicorn process
+# Deployment Architecture (512 MB free tier)
+# ────────────────────────────────────────────────────────────────────────────
+#
+#   Vercel (CDN)  ───────────────────────── React SPA
+#        ↓  VITE_API_BASE_URL
+#   Render (this) ──────────────────────── Flask API + SQLite
+#        ↓  HF_INFERENCE_URL
+#   HuggingFace Space  ────────────────── YOLO26m inference
+#
+# This design keeps Render ≤ 512 MB (no torch / ultralytics installed).
+# Tracker, violation logic, DB, and alerts all run on Render.
+# Only YOLO is offloaded to HF Space (free CPU Space, 16 GB RAM).
 #
 # Prerequisites
 # ─────────────
-#  1. Push this repo to GitHub / GitLab.
-#  2. On Render → New → Blueprint, point to your repo.
-#  3. Set the required secret env vars in the Render dashboard
-#     (MODEL_DOWNLOAD_URL if you host best.pt externally, FLASK_SECRET_KEY, etc.)
-#  4. Attach the persistent disk so SQLite + demo videos survive redeploys.
+#  1. Deploy hf_space/ to a HuggingFace Space (SDK: docker).
+#  2. Upload best.pt to that Space.
+#  3. Push this repo to GitHub / GitLab.
+#  4. On Render → New → Blueprint, connect your repo.
+#  5. Set HF_INFERENCE_URL and FLASK_SECRET_KEY in the Render dashboard.
 #
 # Persistent Disk
 # ───────────────
-#  Mount path : /data          (see `disk` section below)
-#  DATABASE_PATH  → /data/safesight.db
-#  STORAGE_PATH   → /data/storage/violations
-#  DEMO_STORAGE_PATH → /data/storage/demo
-#  LOG_PATH       → /data/logs
-#
-# Note on inference
-# ─────────────────
-#  Render Web Services do NOT have GPUs.  Inference (YOLO) runs on CPU.
-#  The live-inference feature will work but at lower FPS than locally.
-#  The Demo page shows pre-generated videos stored on the persistent disk.
+#  Mount path : /data
+#  DATABASE_PATH       → /data/safesight.db
+#  STORAGE_PATH        → /data/storage/violations
+#  DEMO_STORAGE_PATH   → /data/storage/demo
+#  LOG_PATH            → /data/logs
 ##############################################################################
 
 services:
@@ -74,32 +77,27 @@ services:
       - key: LOG_PATH
         value: /data/logs
 
-      # Model: keep best.pt in git OR set MODEL_DOWNLOAD_URL and build.sh
-      # will fetch it automatically on each deploy.
-      - key: MODEL_PATH
-        value: model/best.pt        # relative to project root (default)
+      # Remote inference – offload YOLO to HuggingFace Space
+      # Set these in Render dashboard after creating your HF Space.
+      - key: USE_REMOTE_INFERENCE
+        value: "true"
 
-      # YOLO / detection
+      - key: HF_INFERENCE_URL
+        value: "https://hiruu-18-safesight-ai.hf.space"
+
+      # YOLO tuning (forwarded to HF Space per request)
       - key: CONF_THRESHOLD
         value: "0.30"
       - key: IOU_THRESHOLD
         value: "0.30"
-      - key: DEVICE
-        value: "cpu"                # no GPU on Render
       - key: IMG_SIZE
-        value: "416"                # smaller = faster on CPU
+        value: "512"
 
       # Flask
       - key: API_DEBUG
         value: "false"
       - key: FLASK_SECRET_KEY
-        generateValue: true         # Render generates a random value
-
-      # Optional – fill in the Render dashboard, not here
-      # - key: ALERT_WEBHOOK_URL
-      #   sync: false               # user provides at deploy time
-      # - key: MODEL_DOWNLOAD_URL
-      #   sync: false               # URL to download best.pt if not in git
+        generateValue: true
 
     # ── Health check ─────────────────────────────────────────────────────
     healthCheckPath: /health

@@ -8,8 +8,15 @@ import time
 import threading
 import numpy as np
 from typing import Optional, Dict, Any
-from ultralytics import YOLO
-import torch
+
+try:
+    from ultralytics import YOLO
+    import torch
+    _YOLO_AVAILABLE = True
+except ImportError:
+    YOLO = None  # type: ignore[assignment,misc]
+    torch = None  # type: ignore[assignment]
+    _YOLO_AVAILABLE = False
 
 from config.settings import (
     MODEL_PATH, IMG_SIZE, CONF_THRESHOLD, 
@@ -56,6 +63,12 @@ class InferencePipeline:
         # Load or reuse YOLO model
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         
+        if not _YOLO_AVAILABLE:
+            raise RuntimeError(
+                "ultralytics / torch not installed. "
+                "Set USE_REMOTE_INFERENCE=true to use RemoteInferencePipeline instead."
+            )
+
         if shared_model is not None:
             self.model = shared_model
             print(f"🔗 Reusing shared model on {self.device}")

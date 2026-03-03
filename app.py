@@ -26,11 +26,22 @@ import threading
 from pathlib import Path
 from typing import Dict, List
 
-from ultralytics import YOLO
-import torch
+try:
+    from ultralytics import YOLO
+    import torch
+    _YOLO_AVAILABLE = True
+except ImportError:
+    YOLO = None  # type: ignore[assignment,misc]
+    torch = None  # type: ignore[assignment]
+    _YOLO_AVAILABLE = False
 
 from config import settings
-from core.inference import InferencePipeline
+from config.settings import USE_REMOTE_INFERENCE
+
+if USE_REMOTE_INFERENCE:
+    from core.remote_inference import RemoteInferencePipeline as InferencePipeline  # type: ignore[assignment]
+else:
+    from core.inference import InferencePipeline
 from api.dashboard_api import run_api_server
 
 

@@ -1,0 +1,22 @@
+# SafeSight AI – Render deployment dependencies
+# ──────────────────────────────────────────────────────────────────────────────
+# This file is used by Render (build.sh) instead of requirements.txt.
+# PyTorch / ultralytics are NOT installed here – inference is offloaded to
+# the HuggingFace Space (see hf_space/).  This keeps Render well under 512 MB.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# API & Web
+flask>=2.3.0
+flask-cors>=4.0.0
+gunicorn>=21.2.0
+
+# Database & I/O
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Lightweight vision (frame encode/decode for remote inference + MJPEG stream)
+opencv-python-headless>=4.8.0
+numpy>=1.24.0
+
+# Image processing (used by storage.py for evidence crops)
+Pillow>=10.0.0

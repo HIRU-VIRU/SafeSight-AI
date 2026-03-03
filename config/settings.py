@@ -56,6 +56,13 @@ API_HOST  = os.getenv("API_HOST",  "0.0.0.0")
 API_PORT  = int(os.getenv("PORT") or os.getenv("API_PORT", "5000"))
 API_DEBUG = os.getenv("API_DEBUG", "false").lower() == "true"
 
+# ── Remote inference (HuggingFace Space) ─────────────────────────────────────
+# Set USE_REMOTE_INFERENCE=true on Render to skip loading YOLO locally.
+# HF_INFERENCE_URL must point to your HF Space, e.g.:
+#   https://your-username-safesight-ai-inference.hf.space
+USE_REMOTE_INFERENCE = os.getenv("USE_REMOTE_INFERENCE", "false").lower() == "true"
+HF_INFERENCE_URL     = os.getenv("HF_INFERENCE_URL", "")
+
 # Performance Configuration
 TARGET_FPS = int(os.getenv("TARGET_FPS", "20"))
 
@@ -77,9 +84,15 @@ REQUIRED_PPE = MANDATORY_PPE + OPTIONAL_PPE
 
 def validate_config() -> bool:
     """Validate configuration and check required files exist."""
-    if not Path(MODEL_PATH).exists():
-        print(f"❌ Model file not found: {MODEL_PATH}")
-        return False
+    if USE_REMOTE_INFERENCE:
+        if not HF_INFERENCE_URL:
+            print("❌ USE_REMOTE_INFERENCE=true but HF_INFERENCE_URL is not set")
+            return False
+        print(f"✅ Remote inference mode → {HF_INFERENCE_URL}")
+    else:
+        if not Path(MODEL_PATH).exists():
+            print(f"❌ Model file not found: {MODEL_PATH}")
+            return False
     
     # Create storage directories if they don't exist
     Path(STORAGE_PATH).mkdir(parents=True, exist_ok=True)
