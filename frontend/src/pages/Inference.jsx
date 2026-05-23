@@ -29,14 +29,18 @@ export default function Inference() {
   const [apiOnline, setApiOnline] = useState(null);
   const [expandedStream, setExpandedStream] = useState(null); // stream_id to show full-size
 
+  const [apiError, setApiError] = useState('');
+
   const refresh = async () => {
     try {
       await healthCheck();
       setApiOnline(true);
+      setApiError('');
       const res = await getInferenceStatus();
       setStreams(res.streams || []);
-    } catch {
+    } catch (err) {
       setApiOnline(false);
+      setApiError(err.message);
       setStreams([]);
     }
   };
@@ -103,6 +107,11 @@ export default function Inference() {
             </>
           ) : (
             <span className="text-[var(--color-text-muted)]">Checking…</span>
+          )}
+          {apiError && (
+            <span className="text-xs text-[var(--color-text-muted)] max-w-md truncate ml-2" title={apiError}>
+              {apiError}
+            </span>
           )}
         </span>
       </div>
