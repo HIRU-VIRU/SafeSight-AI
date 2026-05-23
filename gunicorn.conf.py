@@ -7,8 +7,8 @@ import os
 import multiprocessing
 
 # Bind is set by Render via --bind "0.0.0.0:$PORT" in the startCommand.
-# This file provides sensible defaults for local production testing:
-bind = f"0.0.0.0:{os.getenv('PORT', os.getenv('API_PORT', '5000'))}"
+# Commented out to avoid duplicate-bind conflict with the CLI flag.
+# bind = f"0.0.0.0:{os.getenv('PORT', os.getenv('API_PORT', '5000'))}"
 
 # Workers: 1 on Render free/starter (RAM constrained).
 # Formula for larger plans: (2 × CPU cores) + 1

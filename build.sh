@@ -38,9 +38,9 @@ echo "  ✅ Python deps installed"
 echo ""
 echo "▶ [2/4] Building React frontend..."
 if [ ! -d "frontend/node_modules" ]; then
-  npm ci --prefix frontend --silent
+  npm ci --prefix frontend
 fi
-npm run build --prefix frontend --silent
+npm run build --prefix frontend
 echo "  ✅ Frontend built → frontend/dist/"
 
 # ── 3. YOLO model ─────────────────────────────────────────────────────────────
